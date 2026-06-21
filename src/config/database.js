@@ -1,40 +1,35 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const pg = require('pg');
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://sensivapp_db_user:2ZOLL0HqecDBriRaT7NHK2A8PREtUJDu@dpg-d8s2ace7r5hc73euqr8g-a.oregon-postgres.render.com/sensivapp_db';
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    dialect: 'postgres',
-    port: process.env.DB_PORT || 5432,
-    dialectModule: pg, 
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
-      },
-      family: 4 
-    },
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
-    logging: false
-  }
-);
+const sequelize = new Sequelize(databaseUrl, {
+  dialect: 'postgres',
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  },
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  },
+  logging: false
+});
 
 async function testConnection() {
   try {
     await sequelize.authenticate();
-    console.log('Conexão com PostgreSQL (Supabase) estabelecida com sucesso!');
+    console.log('✅ Conexão com PostgreSQL (Render) estabelecida com sucesso!');
+    
+    await sequelize.sync({ alter: true });
+    console.log('🚀 Tabelas sincronizadas!');
+    
   } catch (error) {
-    console.error('Erro ao conectar ao banco de dados:', error);
+    console.error('❌ Erro ao conectar ao banco de dados:', error.message);
   }
 }
 
