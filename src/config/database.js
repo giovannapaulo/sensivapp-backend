@@ -8,14 +8,20 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: 'postgres',
-    port: 5432,         
+    port: process.env.DB_PORT || 5432,
     dialectOptions: {
       ssl: {
-        require: true,  
+        require: true,
         rejectUnauthorized: false 
       }
     },
-    logging: false       
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    },
+    logging: false 
   }
 );
 
@@ -24,7 +30,7 @@ async function testConnection() {
     await sequelize.authenticate();
     console.log('Conexão com PostgreSQL (Supabase) estabelecida com sucesso!');
   } catch (error) {
-    console.error('Erro ao conectar ao banco:', error);
+    console.error('Erro ao conectar ao banco de dados:', error);
   }
 }
 
